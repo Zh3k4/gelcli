@@ -35,13 +35,4 @@ uninstall:
 clean:
 	@rm -f $(OBJ) gelcli gelcli.tgz
 
-dist: clean
-	mkdir gelcli
-	cp -r \
-		src/ include/ \
-		.editorconfig Makefile \
-		gelcli/
-	tar czf gelcli.tgz gelcli/
-	rm -rf gelcli/
-
-.PHONY: install uninstall clean dist
+.PHONY: install uninstall clean
