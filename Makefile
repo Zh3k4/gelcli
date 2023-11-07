@@ -13,8 +13,9 @@ BINDIR ?= $(PREFIX)/bin
 OUTDIR = .build
 
 OBJ = \
+	  $(OUTDIR)/json.o \
 	  $(OUTDIR)/main.o \
-	  $(OUTDIR)/json.o
+	  $(OUTDIR)/slice.o
 
 gelcli: $(OBJ)
 	@printf 'LD\t%s\n' $@
