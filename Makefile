@@ -34,6 +34,6 @@ uninstall:
 	rm -f $(DESTDIR)/$(BINDIR)/gelcli
 
 clean:
-	@rm -f $(OBJ) gelcli gelcli.tgz
+	@rm -f $(OBJ) gelcli
 
 .PHONY: install uninstall clean
