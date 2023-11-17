@@ -43,6 +43,8 @@ struct json_ctx {
 };
 
 const char *json_strerr(enum json_err err);
+const char *json_strtype(enum json_object_type type);
+void json_str(struct json_ctx *json);
 struct json_ctx json_ctx_init(const char *data, ptrdiff_t datalen);
 enum json_err json_next(struct json_ctx *json);
 
@@ -57,12 +59,58 @@ const char *
 json_strerr(enum json_err err)
 {
 	switch(err) {
-	case JSONE_OK:
-		return "OK!";
-	case JSONE_BADJSON:
-		return "Bad file format!";
-	default:
-		assert(0 && "unreachable");
+	case JSONE_OK: return "OK!";
+	case JSONE_BADJSON: return "Bad file format!";
+	case JSONE_EOF: return "End of file!";
+	case JSONE_MARKER: return "Here it is!";
+	default: assert(0 && "unreachable");
+	}
+}
+
+const char *
+json_strtype(enum json_object_type type)
+{
+	switch (type) {
+	case JSON_NONE: return "NONE";
+	case JSON_ARRAY_BEGIN: return "ARRAY_BEGIN";
+	case JSON_ARRAY_END: return "ARRAY_END";
+	case JSON_ASSIGN: return "ASSIGN";
+	case JSON_BOOL: return "BOOL";
+	case JSON_COMMA: return "COMMA";
+	case JSON_DOUBLE: return "DOUBLE";
+	case JSON_INT: return "INT";
+	case JSON_KEY: return "KEY";
+	case JSON_OBJECT_BEGIN: return "OBJECT_BEGIN";
+	case JSON_OBJECT_END: return "OBJECT_END";
+	case JSON_STRING: return "STRING";
+	default: assert(0 && "unreachable");
+	}
+}
+
+void
+json_str(struct json_ctx *json)
+{
+	switch (json->type) {
+	case JSON_NONE: assert(0 && "todo");
+	case JSON_ARRAY_BEGIN: printf("%c", '['); break;
+	case JSON_ARRAY_END: printf("%c", ']'); break;
+	case JSON_ASSIGN: printf("%c", ':'); break;
+	case JSON_BOOL:
+		if (json->as._int) puts("true");
+		else puts("false");
+		break;
+	case JSON_COMMA: printf ("%c", ','); break;
+	case JSON_DOUBLE: printf("%f", json->as._double); break;
+	case JSON_INT: printf("%d", json->as._int); break;
+	case JSON_KEY:
+		printf("\"%.*s\"", (int)json->as.key.len, json->as.key.data);
+		break;
+	case JSON_OBJECT_BEGIN: printf("%c", '{'); break;
+	case JSON_OBJECT_END: printf("%c", '}'); break;
+	case JSON_STRING:
+		printf("\"%.*s\"", (int)json->as.string.len, json->as.string.data);
+		break;
+	default: assert(0 && "unreachable");
 	}
 }
 
