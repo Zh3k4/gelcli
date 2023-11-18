@@ -21,6 +21,8 @@ gelcli: $(OBJ)
 	@printf 'LD\t%s\n' $@
 	@$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
+$(OUTDIR)/json.o: include/json.h
+
 $(OUTDIR)/%.o: src/%.c
 	@mkdir -p $(OUTDIR)
 	@printf 'CC\t%s\n' $@
