@@ -54,6 +54,8 @@ enum json_err json_next(struct json_ctx *json);
 
 #include <assert.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <string.h>
 
 const char *
 json_strerr(enum json_err err)
