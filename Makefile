@@ -29,11 +29,11 @@ $(OUTDIR)/%.o: src/%.c
 	@$(CC) -std=c99 -pedantic -c -o $@ $(CFLAGS) $(MAINFLAGS) $(INCLUDE) $<
 
 install: gelcli
-	mkdir -p $(DESTDIR)/$(BINDIR)
-	install -m755 gelcli $(DESTDIR)/$(BINDIR)/gelcli
+	mkdir -p $(DESTDIR)$(BINDIR)
+	install -m755 gelcli $(DESTDIR)$(BINDIR)/gelcli
 
 uninstall:
-	rm -f $(DESTDIR)/$(BINDIR)/gelcli
+	rm -f $(DESTDIR)$(BINDIR)/gelcli
 
 clean:
 	@rm -f $(OBJ) gelcli
