@@ -5,7 +5,6 @@ VERSION = 0.1.0
 
 MAINFLAGS := -DVERSION='"$(VERSION)"' -Wall -Wextra -Werror
 CFLAGS ?= -g
-INCLUDE += -Iinclude
 LIBS += -lcurl
 
 PREFIX ?= /usr/local
@@ -20,8 +19,6 @@ OBJ = \
 gelcli: $(OBJ)
 	@printf 'LD\t%s\n' $@
 	@$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
-
-$(OUTDIR)/json.o: include/json.h
 
 $(OUTDIR)/%.o: src/%.c
 	@mkdir -p $(OUTDIR)
