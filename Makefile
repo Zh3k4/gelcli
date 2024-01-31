@@ -12,7 +12,7 @@ BINDIR ?= $(PREFIX)/bin
 OUTDIR = .build
 
 OBJ = \
-	  $(OUTDIR)/json.o \
+	  $(OUTDIR)/jsmn.o \
 	  $(OUTDIR)/main.o \
 	  $(OUTDIR)/slice.o
 

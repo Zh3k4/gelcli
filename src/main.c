@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "json.h"
+#include "jsmn.h"
 
 struct Mem {
 	char *memory;
@@ -48,8 +48,32 @@ run(void)
 		goto out;
 	}
 
-	printf("%*s\n", (int)mem.size, mem.memory);
+	jsmn_parser p;
+	jsmn_init(&p);
+	int ntok = jsmn_parse(&p, mem.memory, mem.size, NULL, 0);
 
+	if (ntok < 0) {
+		fprintf(stderr, "Error: could not parse json\n");
+		result = 0; goto out;
+	}
+
+	jsmntok_t *tokens = calloc(ntok, sizeof(jsmntok_t));
+	jsmn_init(&p);
+	if (!tokens) {
+		fprintf(stderr, "Error: calloc\n");
+		result = 0; goto out;
+	}
+	ntok = jsmn_parse(&p, mem.memory, mem.size, tokens, ntok);
+
+	if (ntok < 1 || tokens[0].type != JSMN_OBJECT) {
+		fprintf(stderr, "Error: could not parse json\n");
+		free(tokens);
+		result = 0; goto out;
+	}
+
+	/* We've got the tokens! */
+
+	free(tokens);
 	result = 1;
 
 out:
