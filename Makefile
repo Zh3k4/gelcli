@@ -4,7 +4,7 @@
 VERSION = 0.1.0
 
 MAINFLAGS := -DVERSION='"$(VERSION)"' -Wall -Wextra -Werror
-CFLAGS ?= -g
+CFLAGS += -g
 LIBS += -lcurl
 
 PREFIX ?= /usr/local
