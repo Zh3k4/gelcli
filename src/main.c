@@ -13,8 +13,26 @@ struct Mem {
 const char *const gel = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&apikey=%s&tags=%s";
 char reqbuf[2048] = {0};
 
-static size_t write_memory_func(void *content, size_t membsize,
-	size_t nmemb, void *userp);
+static size_t
+write_memory_func(void *content, size_t membsize, size_t nmemb, void *userp)
+{
+	size_t size = membsize * nmemb;
+	struct Mem *mem = (struct Mem *)userp;
+
+	char *re = realloc(mem->memory, mem->size + size + 1);
+	if (re == NULL) {
+		fprintf(stderr, "Error: out of memory");
+		return 0;
+	}
+
+	mem->memory = re;
+
+	memcpy(&(mem->memory[mem->size]), content, size);
+	mem->size += size;
+	mem->memory[mem->size] = '\0';
+
+	return size;
+}
 
 static int
 run(void)
@@ -87,25 +105,4 @@ int
 main(void)
 {
 	return !run();
-}
-
-static size_t
-write_memory_func(void *content, size_t membsize, size_t nmemb, void *userp)
-{
-	size_t size = membsize * nmemb;
-	struct Mem *mem = (struct Mem *)userp;
-
-	char *re = realloc(mem->memory, mem->size + size + 1);
-	if (re == NULL) {
-		fprintf(stderr, "Error: out of memory");
-		return 0;
-	}
-
-	mem->memory = re;
-
-	memcpy(&(mem->memory[mem->size]), content, size);
-	mem->size += size;
-	mem->memory[mem->size] = '\0';
-
-	return size;
 }
