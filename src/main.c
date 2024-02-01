@@ -52,6 +52,11 @@ run(void)
 	mem.memory = malloc(1);
 	mem.size = 0;
 
+	if (!mem.memory) {
+		result = 0;
+		goto out_curl;
+	}
+
 	snprintf(reqbuf, 2048, gel, "", "1girl");
 	curl_easy_setopt(curl, CURLOPT_URL, reqbuf);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_memory_func);
@@ -63,7 +68,7 @@ run(void)
 		fprintf(stderr, "Error: %s\n",
 			curl_easy_strerror(curlcode));
 		result = 0;
-		goto out;
+		goto out_mem;
 	}
 
 	jsmn_parser p;
@@ -72,31 +77,33 @@ run(void)
 
 	if (ntok < 1) {
 		fprintf(stderr, "Error: could not parse json\n");
-		result = 0; goto out;
+		result = 0; goto out_mem;
 	}
 
 	jsmntok_t *tokens = calloc(ntok, sizeof(jsmntok_t));
 	jsmn_init(&p);
 	if (!tokens) {
 		fprintf(stderr, "Error: calloc\n");
-		result = 0; goto out;
+		result = 0; goto out_mem;
 	}
 	ntok = jsmn_parse(&p, mem.memory, mem.size, tokens, ntok);
 
 	if (ntok < 1 || tokens[0].type != JSMN_OBJECT) {
 		fprintf(stderr, "Error: could not parse json\n");
-		free(tokens);
-		result = 0; goto out;
+		result = 0; goto out_tokens;
 	}
 
 	/* We've got the tokens! */
 
-	free(tokens);
 	result = 1;
 
+out_tokens:
+	free(tokens);
+out_mem:
+	free(mem.memory);
+out_curl:
+	curl_easy_cleanup(curl);
 out:
-	if (mem.memory) free(mem.memory);
-	if (curl) curl_easy_cleanup(curl);
 	curl_global_cleanup();
 	return result;
 }
