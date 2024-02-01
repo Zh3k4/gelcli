@@ -95,11 +95,13 @@ write_memory_func(void *content, size_t membsize, size_t nmemb, void *userp)
 	size_t size = membsize * nmemb;
 	struct Mem *mem = (struct Mem *)userp;
 
-	mem-> memory = realloc(mem->memory, mem->size + size + 1);
-	if (mem->memory == NULL) {
+	char *re = realloc(mem->memory, mem->size + size + 1);
+	if (re == NULL) {
 		fprintf(stderr, "Error: out of memory");
 		return 0;
 	}
+
+	mem->memory = re;
 
 	memcpy(&(mem->memory[mem->size]), content, size);
 	mem->size += size;
