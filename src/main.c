@@ -39,7 +39,7 @@ write_memory_func(void *content, size_t membsize, size_t nmemb, void *userp)
 }
 
 static struct Mem
-perform_api_call(void)
+perform_api_call(const char *const key, const char *const tags)
 {
 	struct Mem result = { 0 };
 	CURL *curl;
@@ -56,7 +56,7 @@ perform_api_call(void)
 
 	char reqbuf[2048] = {0};
 	const char *const api = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&apikey=%s&tags=%s";
-	snprintf(reqbuf, 2048, api, "", "1girl");
+	snprintf(reqbuf, 2048, api, key, tags);
 	curl_easy_setopt(curl, CURLOPT_URL, reqbuf);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_memory_func);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &mem);
@@ -175,7 +175,7 @@ run(void)
 	int result = 0;
 	curl_global_init(CURL_GLOBAL_ALL);
 
-	struct Mem mem = perform_api_call();
+	struct Mem mem = perform_api_call(NULL, "1girl");
 	if (!mem.memory) goto out;
 
 	jsmn_parser p;
