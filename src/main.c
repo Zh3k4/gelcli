@@ -17,9 +17,6 @@ struct RemoteFile {
 	int filenameLen;
 };
 
-const char *const gel = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&apikey=%s&tags=%s";
-char reqbuf[2048] = {0};
-
 static size_t
 write_memory_func(void *content, size_t membsize, size_t nmemb, void *userp)
 {
@@ -57,7 +54,9 @@ perform_api_call(void)
 
 	if (!mem.memory) goto out_curl;
 
-	snprintf(reqbuf, 2048, gel, "", "1girl");
+	char reqbuf[2048] = {0};
+	const char *const api = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&apikey=%s&tags=%s";
+	snprintf(reqbuf, 2048, api, "", "1girl");
 	curl_easy_setopt(curl, CURLOPT_URL, reqbuf);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_memory_func);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &mem);
