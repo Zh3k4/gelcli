@@ -13,8 +13,7 @@ BINDIR = $(PREFIX)/bin
 
 OBJ = \
 	src/jsmn.o \
-	src/main.o \
-	src/slice.o
+	src/main.o
 
 gelcli: $(OBJ)
 	@printf 'CCLD\t%s\n' '$@'

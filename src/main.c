@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "jsmn.h"
-#include "slice.h"
 
 struct Mem {
 	char *memory;
