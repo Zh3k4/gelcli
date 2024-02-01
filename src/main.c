@@ -52,7 +52,7 @@ run(void)
 	jsmn_init(&p);
 	int ntok = jsmn_parse(&p, mem.memory, mem.size, NULL, 0);
 
-	if (ntok < 0) {
+	if (ntok < 1) {
 		fprintf(stderr, "Error: could not parse json\n");
 		result = 0; goto out;
 	}
