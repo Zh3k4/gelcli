@@ -104,5 +104,5 @@ out:
 int
 main(void)
 {
-	return !run();
+	return run() ? EXIT_SUCCESS : EXIT_FAILURE;
 }
