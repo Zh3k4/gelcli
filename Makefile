@@ -18,7 +18,7 @@ OBJ = \
 
 gelcli: $(OBJ)
 	@printf 'CCLD\t%s\n' '$@'
-	@$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+	@$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LDLIBS)
 
 .SUFFIXES: .c .o
 .c.o:
