@@ -3,36 +3,34 @@
 
 VERSION = 0.1.0
 
-MAINFLAGS := -DVERSION='"$(VERSION)"' -Wall -Wextra -Werror
-CFLAGS += -g
-LIBS += -lcurl
+MAINFLAGS = --std=c99 -pedantic -DVERSION='"$(VERSION)"' -Wall -Wextra -Werror
+CFLAGS = -O1 -g
+LDLIBS = -lcurl
 
-PREFIX ?= /usr/local
-BINDIR ?= $(PREFIX)/bin
-OUTDIR = .build
+PREFIX = /usr/local
+BINDIR = $(PREFIX)/bin
 
 OBJ = \
-	  $(OUTDIR)/jsmn.o \
-	  $(OUTDIR)/main.o \
-	  $(OUTDIR)/slice.o
+	  src/jsmn.o \
+	  src/main.o \
+	  src/slice.o
 
 gelcli: $(OBJ)
-	@printf 'LD\t%s\n' $@
-	@$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+	@printf 'CCLD\t%s\n' '$@'
+	@$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
-$(OUTDIR)/%.o: src/%.c
-	@mkdir -p $(OUTDIR)
-	@printf 'CC\t%s\n' $@
-	@$(CC) -std=c99 -pedantic -c -o $@ $(CFLAGS) $(MAINFLAGS) $(INCLUDE) $<
+.SUFFIXES: .c .o
+.c.o:
+	@printf 'CC\t%s\n' '$@'
+	@$(CC) -c -o $@ $(CFLAGS) $(MAINFLAGS) $(INCLUDE) $<
 
 install: gelcli
-	mkdir -p $(DESTDIR)$(BINDIR)
-	install -m755 gelcli $(DESTDIR)$(BINDIR)/gelcli
+	install -Dm755 gelcli $(DESTDIR)$(BINDIR)/gelcli
 
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/gelcli
 
 clean:
-	@rm -f $(OBJ) gelcli
+	rm -f $(OBJ) gelcli
 
 .PHONY: install uninstall clean
