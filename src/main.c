@@ -34,7 +34,7 @@ run(void)
 	mem.memory = malloc(1);
 	mem.size = 0;
 
-	snprintf(reqbuf, 2048, gel, "", "futanari");
+	snprintf(reqbuf, 2048, gel, "", "1girl");
 	curl_easy_setopt(curl, CURLOPT_URL, reqbuf);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_memory_func);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &mem);
