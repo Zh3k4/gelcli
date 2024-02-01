@@ -1,4 +1,5 @@
 .POSIX:
+.PRAGMA: target_name
 .SUFFIXES:
 
 VERSION = 0.1.0
@@ -11,9 +12,9 @@ PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 
 OBJ = \
-	  src/jsmn.o \
-	  src/main.o \
-	  src/slice.o
+	src/jsmn.o \
+	src/main.o \
+	src/slice.o
 
 gelcli: $(OBJ)
 	@printf 'CCLD\t%s\n' '$@'
@@ -32,5 +33,3 @@ uninstall:
 
 clean:
 	rm -f $(OBJ) gelcli
-
-.PHONY: install uninstall clean
