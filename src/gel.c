@@ -102,7 +102,7 @@ defer:
 }
 
 struct GelPost
-get_post(struct GelCtx c, int *ok)
+gel_post_get(struct GelCtx c, int *ok)
 {
 	const char *const json = c.json.data;
 	int ntok = c.ntok;
@@ -165,7 +165,7 @@ defer:
 }
 
 int
-download_post(struct GelPost p)
+gel_post_download(struct GelPost p)
 {
 	char *const url = unescape_str(p.urlLen, p.url);;
 	char *const filename = unescape_str(p.filenameLen, p.filename);

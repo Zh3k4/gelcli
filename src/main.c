@@ -15,10 +15,10 @@ run(void)
 	struct GelCtx gel = gel_create("", "1girl", &ok);
 	if (!ok) goto defer;
 
-	struct GelPost post = get_post(gel, &ok);
+	struct GelPost post = gel_post_get(gel, &ok);
 	if (!ok) goto defer_gel;
 
-	ok = download_post(post);
+	ok = gel_post_download(post);
 	if (ok) {
 		printf("Downloaded file: %.*s\n", post.filenameLen, post.filename);
 		result = 1;
