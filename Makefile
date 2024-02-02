@@ -12,6 +12,7 @@ PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 
 OBJ = \
+	src/gel.o \
 	src/jsmn.o \
 	src/main.o
 
