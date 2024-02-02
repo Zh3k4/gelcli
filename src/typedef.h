@@ -16,6 +16,8 @@ typedef uint64_t u64
 typedef intmax_t smax
 typedef uintmax_t umax
 
+typedef size_t usize
+
 typedef float f32
 typedef double f64
 
