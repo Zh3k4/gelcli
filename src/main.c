@@ -29,8 +29,8 @@ defer_tokens:
 	free(tokens);
 defer_mem:
 	free(mem.memory);
-	*/
 defer:
+	*/
 	curl_global_cleanup();
 	return result;
 }
