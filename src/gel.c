@@ -167,7 +167,7 @@ defer:
 int
 gel_post_download(struct GelPost p)
 {
-	char *const url = unescape_str(p.urlLen, p.url);;
+	char *const url = unescape_str(p.urlLen, p.url);
 	char *const filename = unescape_str(p.filenameLen, p.filename);
 
 	int status = download_file(url, filename);
