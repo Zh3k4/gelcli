@@ -9,18 +9,18 @@ static usize
 write_memory_func(void *content, usize size, usize nmemb, void *userp)
 {
 	size *= nmemb;
-	struct mem m = *(struct mem *)userp;
+	struct mem *m = (struct mem *)userp;
 
-	char *re = realloc(m.data, m.size + size + 1);
+	char *re = realloc(m->data, m->size + size + 1);
 	if (re == NULL) {
 		fprintf(stderr, "Error: out of memory");
 		return 0;
 	}
-	m.data = re;
+	m->data = re;
 
-	memcpy(&(m.data[m.size]), content, size);
-	m.size += size;
-	m.data[m.size] = '\0';
+	memcpy(&(m->data[m->size]), content, size);
+	m->size += size;
+	m->data[m->size] = '\0';
 
 	return size;
 }
