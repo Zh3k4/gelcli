@@ -25,6 +25,6 @@ struct GelPost {
 struct GelCtx gel_create(const char *const key, const char *const tags, int *ok);
 void gel_destroy(struct GelCtx c);
 int gel_post_download(struct GelPost p);
-struct GelPost gel_post_get(struct GelCtx c, int *ok);
+struct GelPost *gel_post_get(struct GelCtx c);
 
 #endif /* GEL_H_ */

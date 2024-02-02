@@ -5,6 +5,14 @@
 
 #include "gel.h"
 
+enum {
+	GEL_POST = 9,
+	GEL_FIRST_POST = 11,
+	GEL_POST_SIZE = 59,
+	GEL_IMAGE = 16,
+	GEL_URL = 44,
+};
+
 static usize
 write_memory_func(void *content, usize size, usize nmemb, void *userp)
 {
@@ -101,31 +109,31 @@ defer:
 	return result;
 }
 
-struct GelPost
-gel_post_get(struct GelCtx c, int *ok)
+struct GelPost *
+gel_post_get(struct GelCtx c)
 {
 	const char *const json = c.json.data;
 	int ntok = c.ntok;
 	jsmntok_t *tokens = c.tokens;
 
-	for (int i = 1; i < ntok; i += 1) {
-		jsmntok_t t = tokens[i];
-		if (!iseq_tok_cstr(json, t, "post")) continue;
+	int count = 0;
+	for (int i = GEL_FIRST_POST; i < ntok; i += GEL_POST_SIZE) count++;
 
-		jsmntok_t url = tokens[i + 2 + 44];
-		jsmntok_t fn = tokens[i + 2 + 16];
+	struct GelPost *posts = calloc(count + 1, sizeof(struct GelPost));
+	if (!posts) return NULL;
 
-		*ok = 1;
-		return (struct GelPost){
-			.url = &json[url.start],
-			.urlLen = url.end - url.start,
-			.filename = &json[fn.start],
-			.filenameLen = fn.end - fn.start,
-		};
+	struct GelPost *p = posts;
+	for (int i = GEL_FIRST_POST; i < ntok; i += GEL_POST_SIZE, p++) {
+		jsmntok_t fn = tokens[i + GEL_IMAGE];
+		jsmntok_t url = tokens[i + GEL_URL];
+
+		p->url = &json[url.start];
+		p->urlLen = url.end - url.start;
+		p->filename = &json[fn.start];
+		p->filenameLen = fn.end - fn.start;
 	}
 
-	*ok = 0;
-	return (struct GelPost){0};
+	return posts;
 }
 
 static int
