@@ -4,26 +4,6 @@
 #include <string.h>
 
 #include "gel.h"
-#include "jsmn.h"
-#include "typedef.h"
-
-struct mem {
-	usize size;
-	char *data;
-};
-
-struct GelCtx {
-	int ntok;
-	struct mem json;
-	jsmntok_t tokens*;
-};
-
-struct GelPost {
-	const char *url;
-	int urlLen;
-	const char *filename;
-	int filenameLen;
-};
 
 static usize
 write_memory_func(void *content, usize size, usize nmemb, void *userp)
@@ -84,14 +64,14 @@ perform_api_call(const char *const key, const char *const tags)
 	CURLcode curlcode;
 
 	curl = curl_easy_init();
-	if (!curl) goto out;
+	if (!curl) goto defer;
 
 	struct mem json = {
 		.data = malloc(1),
 		.size = 0,
 	};
 
-	if (!json.data) goto out_curl;
+	if (!json.data) goto defer_curl;
 
 	char reqbuf[2048] = {0};
 	const char *const api = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&apikey=%s&tags=%s";
@@ -104,11 +84,11 @@ perform_api_call(const char *const key, const char *const tags)
 	if (curlcode != CURLE_OK) {
 		fprintf(stderr, "Error: %s\n",
 			curl_easy_strerror(curlcode));
-		goto out_json;
+		goto defer_json;
 	}
 
 	result = json;
-	goto out_curl;
+	goto defer_curl;
 
 defer_json:
 	free(json.data);
@@ -120,11 +100,11 @@ defer:
 }
 
 struct GelPost
-get_post(struct GelCtx c)
+get_post(struct GelCtx c, int *ok)
 {
 	const char *const json = c.json.data;
 	int ntok = c.ntok;
-	jsmntok_t tokens = c.tokens;
+	jsmntok_t *tokens = c.tokens;
 
 	for (int i = 1; i < ntok; i += 1) {
 		jsmntok_t t = tokens[i];
@@ -133,6 +113,7 @@ get_post(struct GelCtx c)
 		jsmntok_t url = tokens[i + 2 + 44];
 		jsmntok_t fn = tokens[i + 2 + 16];
 
+		*ok = 1;
 		return (struct GelPost){
 			.url = &json[url.start],
 			.urlLen = url.end - url.start,
@@ -141,6 +122,7 @@ get_post(struct GelCtx c)
 		};
 	}
 
+	*ok = 0;
 	return (struct GelPost){0};
 }
 
@@ -150,13 +132,13 @@ download_file(const char *const url, const char *const filepath)
 	int result = 0;
 
 	FILE *file = fopen(filepath, "wb");
-	if (!file) goto out;
+	if (!file) goto defer;
 
 	CURL *curl;
 	CURLcode curlcode;
 
 	curl = curl_easy_init();
-	if (!curl) goto out_file;
+	if (!curl) goto defer_file;
 
 	curl_easy_setopt(curl, CURLOPT_URL, url);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
@@ -167,7 +149,7 @@ download_file(const char *const url, const char *const filepath)
 	if (curlcode != CURLE_OK) {
 		fprintf(stderr, "Error: %s\n",
 			curl_easy_strerror(curlcode));
-		goto out_curl;
+		goto defer_curl;
 	}
 
 	result = 1;
@@ -197,12 +179,13 @@ download_post(struct GelPost p)
 }
 
 struct GelCtx
-gel_create(const char *const key, const char *const tags)
+gel_create(const char *const key, const char *const tags, int *ok)
 {
-	struct GelCtx result = {0};
+	int result = 0;
+	struct GelCtx ctx = {0};
 
 	struct mem json = perform_api_call(key, tags);
-	if (!json.data) goto out;
+	if (!json.data) goto defer;
 
 	jsmn_parser p;
 	jsmn_init(&p);
@@ -210,32 +193,36 @@ gel_create(const char *const key, const char *const tags)
 
 	if (ntok < 1) {
 		fprintf(stderr, "Error: could not parse json\n");
-		result = 0; goto out_json;
+		goto defer_json;
 	}
 
 	jsmntok_t *tokens = calloc(ntok, sizeof(jsmntok_t));
 	jsmn_init(&p);
 	if (!tokens) {
 		fprintf(stderr, "Error: calloc\n");
-		result = 0; goto out_json;
+		goto defer_json;
 	}
 	ntok = jsmn_parse(&p, json.data, json.size, tokens, ntok);
 
 	if (ntok < 1 || tokens[0].type != JSMN_OBJECT) {
 		fprintf(stderr, "Error: could not parse json\n");
-		result = 0; goto out_tokens;
+		goto defer_tokens;
 	}
 
-	result.ntok = ntok;
-	result.json = json;
-	result.tokens = tokens;
+	result = 1;
+	ctx = (struct GelCtx){
+		.ntok = ntok,
+		.json = json,
+		.tokens = tokens,
+	};
 
 defer_tokens:
 	free(tokens);
 defer_json:
 	free(json.data);
 defer:
-	return result;
+	*ok = result;
+	return ctx;
 }
 
 void
