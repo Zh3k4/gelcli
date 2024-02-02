@@ -57,9 +57,10 @@ unescape_str(int len, const char str[len])
 }
 
 static struct mem
-perform_api_call(const char *const key, const char *const tags)
+perform_api_call(const char *const key, const char *const tags, int *ok)
 {
-	struct mem result = { 0 };
+	int status = 0;
+	struct mem result = {0};
 	CURL *curl;
 	CURLcode curlcode;
 
@@ -87,6 +88,7 @@ perform_api_call(const char *const key, const char *const tags)
 		goto defer_json;
 	}
 
+	status = 1;
 	result = json;
 	goto defer_curl;
 
@@ -95,7 +97,7 @@ defer_json:
 defer_curl:
 	curl_easy_cleanup(curl);
 defer:
-
+	*ok = status;
 	return result;
 }
 
@@ -129,7 +131,7 @@ get_post(struct GelCtx c, int *ok)
 static int
 download_file(const char *const url, const char *const filepath)
 {
-	int result = 0;
+	int status = 0;
 
 	FILE *file = fopen(filepath, "wb");
 	if (!file) goto defer;
@@ -152,40 +154,38 @@ download_file(const char *const url, const char *const filepath)
 		goto defer_curl;
 	}
 
-	result = 1;
+	status = 1;
 
 defer_curl:
 	curl_easy_cleanup(curl);
 defer_file:
 	fclose(file);
 defer:
-	return result;
+	return status;
 }
 
 int
 download_post(struct GelPost p)
 {
-	char *const url = calloc(p.urlLen + 1, 1);
-	strncpy(url, p.url, p.urlLen);
-	char *const filename = calloc(p.filenameLen + 1, 1);
-	strncpy(filename, p.filename, p.filenameLen);
+	char *const url = unescape_str(p.urlLen, p.url);;
+	char *const filename = unescape_str(p.filenameLen, p.filename);
 
-	int result = download_file(url, filename);
+	int status = download_file(url, filename);
 
 	free(url);
 	free(filename);
 
-	return result;
+	return status;
 }
 
 struct GelCtx
 gel_create(const char *const key, const char *const tags, int *ok)
 {
-	int result = 0;
-	struct GelCtx ctx = {0};
+	int status = 0;
+	struct GelCtx result = {0};
 
-	struct mem json = perform_api_call(key, tags);
-	if (!json.data) goto defer;
+	struct mem json = perform_api_call(key, tags, &status);
+	if (!status) goto defer;
 
 	jsmn_parser p;
 	jsmn_init(&p);
@@ -209,20 +209,22 @@ gel_create(const char *const key, const char *const tags, int *ok)
 		goto defer_tokens;
 	}
 
-	result = 1;
-	ctx = (struct GelCtx){
+	status = 1;
+	result = (struct GelCtx){
 		.ntok = ntok,
 		.json = json,
 		.tokens = tokens,
 	};
+
+	goto defer;
 
 defer_tokens:
 	free(tokens);
 defer_json:
 	free(json.data);
 defer:
-	*ok = result;
-	return ctx;
+	*ok = status;
+	return result;
 }
 
 void
