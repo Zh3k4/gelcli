@@ -1,4 +1,5 @@
 #include <curl/curl.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,19 +7,27 @@
 #include "gel.h"
 #include "jsmn.h"
 
+void
+usage(const char *const program)
+{
+	printf("Usage: %s <how many to download> <tags>\n", program);
+}
+
 static int
-run(void)
+run(const int nImages, char *const tags)
 {
 	int ok = 0, result = 0;
 	curl_global_init(CURL_GLOBAL_ALL);
 
-	struct GelCtx gel = gel_create("", "1girl", &ok);
+	for (char *c = tags; *c; c++) if (*c == ' ') *c = '+';
+
+	struct GelCtx gel = gel_create("", tags, &ok);
 	if (!ok) goto defer;
 
 	struct GelPost *post = gel_post_get(gel);
 	if (!post) goto defer_gel;
 
-	for (struct GelPost *p = post; p - post < 10; p++) {
+	for (struct GelPost *p = post; p && p - post < nImages; p++) {
 		ok = gel_post_download(*p);
 		if (ok) {
 			printf("Downloaded file: %.*s\n", p->filenameLen, p->filename);
@@ -38,7 +47,24 @@ defer:
 }
 
 int
-main(void)
+main(int argc, char **argv)
 {
-	return run() ? EXIT_SUCCESS : EXIT_FAILURE;
+	if (argc > 1 && strcmp(argv[1], "--help") == 0) {
+		usage(argv[0]);
+		return EXIT_SUCCESS;
+	}
+	if (argc != 3) {
+		usage(argv[0]);
+		return EXIT_FAILURE;
+	}
+
+	char *endptr, *str = argv[1];
+	errno = 0;
+	long val = strtol(str, &endptr, 0);
+	if (errno != 0 || str == endptr || val < 1) {
+		usage(argv[0]);
+		return EXIT_FAILURE;
+	}
+
+	return run(val, argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
