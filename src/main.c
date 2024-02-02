@@ -25,11 +25,12 @@ run(void)
 		printf("Couldn't download file\n");
 	}
 
-out_tokens:
+defer_tokens:
 	free(tokens);
-out_mem:
+defer_mem:
 	free(mem.memory);
-out:
+	*/
+defer:
 	curl_global_cleanup();
 	return result;
 }
