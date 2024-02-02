@@ -15,16 +15,20 @@ run(void)
 	struct GelCtx gel = gel_create("", "1girl", &ok);
 	if (!ok) goto defer;
 
-	struct GelPost post = gel_post_get(gel, &ok);
-	if (!ok) goto defer_gel;
+	struct GelPost *post = gel_post_get(gel);
+	if (!post) goto defer_gel;
 
-	ok = gel_post_download(post);
-	if (ok) {
-		printf("Downloaded file: %.*s\n", post.filenameLen, post.filename);
-		result = 1;
-	} else {
-		printf("Couldn't download file\n");
+	for (struct GelPost *p = post; p - post < 10; p++) {
+		ok = gel_post_download(*p);
+		if (ok) {
+			printf("Downloaded file: %.*s\n", p->filenameLen, p->filename);
+		} else {
+			printf("Couldn't download file\n");
+		}
 	}
+
+	free(post);
+	result = 1;
 
 defer_gel:
 	gel_destroy(gel);
