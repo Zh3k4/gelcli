@@ -208,6 +208,10 @@ gel_create(const char *const key, const char *const tags, int *ok)
 		fprintf(stderr, "Error: could not parse json\n");
 		goto defer_tokens;
 	}
+	if (!iseq_tok_cstr(json.data, tokens[GEL_POST], "post")) {
+		fprintf(stderr, "Error: could not parse json\n");
+		goto defer_tokens;
+	}
 
 	status = 1;
 	result = (struct GelCtx){
