@@ -1,8 +1,11 @@
 #include <curl/curl.h>
+#include <dirent.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "gel.h"
 #include "jsmn.h"
@@ -11,6 +14,30 @@ static void
 usage(const char *const program)
 {
 	printf("Usage: %s <how many to download> <tags>\n", program);
+}
+
+static int
+create_dir(const char *const path)
+{
+	errno = 0;
+	DIR *dir = opendir(path);
+	if (dir) {
+		closedir(dir);
+		return 1;
+	}
+
+	if (errno != ENOENT) {
+		perror("opendir");
+		return 0;
+	}
+
+	errno = 0;
+	if (mkdir(path, 0700) == -1 && errno != EEXIST) {
+		perror("opendir");
+		return 0;
+	}
+
+	return 1;
 }
 
 static int
@@ -63,6 +90,12 @@ main(int argc, char **argv)
 	long val = strtol(str, &endptr, 0);
 	if (errno != 0 || str == endptr || val < 1) {
 		usage(argv[0]);
+		return EXIT_FAILURE;
+	}
+
+	if (!create_dir("gelbooru")) return EXIT_FAILURE;
+	if (chdir("gelbooru") == -1) {
+		perror("chdir");
 		return EXIT_FAILURE;
 	}
 
