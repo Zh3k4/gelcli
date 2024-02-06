@@ -7,7 +7,7 @@
 #include "gel.h"
 #include "jsmn.h"
 
-void
+static void
 usage(const char *const program)
 {
 	printf("Usage: %s <how many to download> <tags>\n", program);
