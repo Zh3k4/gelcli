@@ -19,24 +19,19 @@ usage(const char *const program)
 static int
 create_dir(const char *const path)
 {
-	errno = 0;
 	DIR *dir = opendir(path);
 	if (dir) {
 		closedir(dir);
 		return 1;
 	}
-
 	if (errno != ENOENT) {
 		perror("opendir");
 		return 0;
 	}
-
-	errno = 0;
 	if (mkdir(path, 0700) == -1 && errno != EEXIST) {
 		perror("opendir");
 		return 0;
 	}
-
 	return 1;
 }
 
