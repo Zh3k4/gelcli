@@ -22,9 +22,19 @@ struct GelPost {
 	int filenameLen;
 };
 
-struct GelCtx gel_create(const char *const key, const char *const tags, int *ok);
+struct GelResult {
+	int ok;
+	union {
+		const char *err;
+		struct GelCtx ctx;
+		struct GelPost *post;
+		struct mem mem;
+	} as;
+};
+
+struct GelResult gel_create(const char *const key, const char *const tags);
 void gel_destroy(struct GelCtx c);
 int gel_post_download(struct GelPost p);
-struct GelPost *gel_post_get(struct GelCtx c);
+struct GelResult gel_post_get(struct GelCtx c);
 
 #endif /* GEL_H_ */

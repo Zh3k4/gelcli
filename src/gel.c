@@ -64,23 +64,29 @@ unescape_str(int len, const char str[len])
 	return new;
 }
 
-static struct mem
-perform_api_call(const char *const key, const char *const tags, int *ok)
+static struct GelResult
+perform_api_call(const char *const key, const char *const tags)
 {
-	int status = 0;
-	struct mem result = {0};
+	struct GelResult result = {0};
+
 	CURL *curl;
 	CURLcode curlcode;
 
 	curl = curl_easy_init();
-	if (!curl) goto defer;
+	if (!curl) {
+		result.as.err = "Curl init error";
+		goto defer;
+	}
 
 	struct mem json = {
 		.data = malloc(1),
 		.size = 0,
 	};
 
-	if (!json.data) goto defer_curl;
+	if (!json.data) {
+		result.as.err = "Memory allocation error for json string";
+		goto defer_curl;
+	}
 
 	char reqbuf[2048] = {0};
 	const char *const api = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&apikey=%s&tags=%s";
@@ -91,13 +97,12 @@ perform_api_call(const char *const key, const char *const tags, int *ok)
 
 	curlcode = curl_easy_perform(curl);
 	if (curlcode != CURLE_OK) {
-		fprintf(stderr, "Error: %s\n",
-			curl_easy_strerror(curlcode));
+		result.as.err = curl_easy_strerror(curlcode);
 		goto defer_json;
 	}
 
-	status = 1;
-	result = json;
+	result.ok = 1;
+	result.as.mem = json;
 	goto defer_curl;
 
 defer_json:
@@ -105,13 +110,14 @@ defer_json:
 defer_curl:
 	curl_easy_cleanup(curl);
 defer:
-	*ok = status;
 	return result;
 }
 
-struct GelPost *
+struct GelResult
 gel_post_get(struct GelCtx c)
 {
+	struct GelResult result = {0};
+
 	const char *const json = c.json.data;
 	int ntok = c.ntok;
 	jsmntok_t *tokens = c.tokens;
@@ -120,7 +126,10 @@ gel_post_get(struct GelCtx c)
 	for (int i = GEL_FIRST_POST; i < ntok; i += GEL_POST_SIZE) count++;
 
 	struct GelPost *posts = calloc(count + 1, sizeof(struct GelPost));
-	if (!posts) return NULL;
+	if (!posts) {
+		result.as.err = "Cannot allocate memory";
+		return result;
+	}
 
 	struct GelPost *p = posts;
 	for (int i = GEL_FIRST_POST; i < ntok; i += GEL_POST_SIZE, p++) {
@@ -133,7 +142,9 @@ gel_post_get(struct GelCtx c)
 		p->filenameLen = fn.end - fn.start;
 	}
 
-	return posts;
+	result.ok = 1;
+	result.as.post = posts;
+	return result;
 }
 
 static int
@@ -186,43 +197,46 @@ gel_post_download(struct GelPost p)
 	return status;
 }
 
-struct GelCtx
-gel_create(const char *const key, const char *const tags, int *ok)
+struct GelResult
+gel_create(const char *const key, const char *const tags)
 {
-	int status = 0;
-	struct GelCtx result = {0};
+	struct GelResult result = {0}, ret = {0};
 
-	struct mem json = perform_api_call(key, tags, &status);
-	if (!status) goto defer;
+	ret = perform_api_call(key, tags);
+	if (!ret.ok) {
+		result.as.err = ret.as.err;
+		goto defer;
+	}
+	struct mem json = ret.as.mem;
 
 	jsmn_parser p;
 	jsmn_init(&p);
 	int ntok = jsmn_parse(&p, json.data, json.size, NULL, 0);
 
 	if (ntok < 1) {
-		fprintf(stderr, "Error: could not parse json\n");
+		result.as.err = "Could not parse json";
 		goto defer_json;
 	}
 
 	jsmntok_t *tokens = calloc(ntok, sizeof(jsmntok_t));
 	jsmn_init(&p);
 	if (!tokens) {
-		fprintf(stderr, "Error: calloc\n");
+		result.as.err = "Could not allocate memory";
 		goto defer_json;
 	}
 	ntok = jsmn_parse(&p, json.data, json.size, tokens, ntok);
 
 	if (ntok < 1 || tokens[0].type != JSMN_OBJECT) {
-		fprintf(stderr, "Error: could not parse json\n");
+		result.as.err = "Could not parse json";
 		goto defer_tokens;
 	}
 	if (!iseq_tok_cstr(json.data, tokens[GEL_POST], "post")) {
-		fprintf(stderr, "Error: could not parse json\n");
+		result.as.err = "Could not parse json";
 		goto defer_tokens;
 	}
 
-	status = 1;
-	result = (struct GelCtx){
+	result.ok = 1;
+	result.as.ctx = (struct GelCtx){
 		.ntok = ntok,
 		.json = json,
 		.tokens = tokens,
@@ -235,7 +249,6 @@ defer_tokens:
 defer_json:
 	free(json.data);
 defer:
-	*ok = status;
 	return result;
 }
 

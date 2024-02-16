@@ -38,19 +38,29 @@ create_dir(const char *const path)
 static int
 run(const int nImages, char *const tags)
 {
-	int ok = 0, result = 0;
+	int result = 0;
+	struct GelResult ret;
+
 	curl_global_init(CURL_GLOBAL_ALL);
 
 	for (char *c = tags; *c; c++) if (*c == ' ') *c = '+';
 
-	struct GelCtx gel = gel_create("", tags, &ok);
-	if (!ok) goto defer;
+	ret = gel_create("", tags);
+	if (!ret.ok) {
+		fprintf(stderr, "Error: %s\n", ret.as.err);
+		goto defer;
+	}
+	struct GelCtx gel = ret.as.ctx;
 
-	struct GelPost *post = gel_post_get(gel);
-	if (!post) goto defer_gel;
+	ret = gel_post_get(gel);
+	if (!ret.ok) {
+		fprintf(stderr, "Error: %s\n", ret.as.err);
+		goto defer_gel;
+	}
+	struct GelPost *post = ret.as.post;
 
 	for (struct GelPost *p = post; p && p - post < nImages; p++) {
-		ok = gel_post_download(*p);
+		int ok = gel_post_download(*p);
 		if (ok) {
 			printf("Downloaded file: %.*s\n", p->filenameLen, p->filename);
 		} else {
