@@ -2,7 +2,7 @@
 .PRAGMA: target_name
 .SUFFIXES:
 
-VERSION = 0.1.0
+VERSION = 0.2.0
 
 MAINFLAGS = --std=c99 -pedantic -DVERSION='"$(VERSION)"' -Wall -Wextra -Werror
 CFLAGS = -O1 -g
