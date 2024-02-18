@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "gel.h"
 
@@ -148,12 +149,21 @@ gel_post_get(struct GelCtx c)
 }
 
 static int
+file_exists(const char *const filepath)
+{
+	struct stat st;
+	return 0 == stat(filepath, &st);
+}
+
+static int
 download_file(const char *const url, const char *const filepath)
 {
-	int status = 0;
+	if (file_exists(filepath)) return 1;
 
 	FILE *file = fopen(filepath, "wb");
-	if (!file) goto defer;
+	if (!file) return 0;
+
+	int status = 0;
 
 	CURL *curl;
 	CURLcode curlcode;
@@ -179,7 +189,6 @@ defer_curl:
 	curl_easy_cleanup(curl);
 defer_file:
 	fclose(file);
-defer:
 	return status;
 }
 
