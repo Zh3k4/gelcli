@@ -60,10 +60,10 @@ run(const int nImages, char *const tags)
 	struct GelPost *post = ret.as.post;
 
 	for (struct GelPost *p = post; p && p - post < nImages; p++) {
-		int ok = gel_post_download(*p);
-		if (ok) {
+		int status = gel_post_download(*p);
+		if (status == 1) {
 			printf("Downloaded file: %.*s\n", p->filenameLen, p->filename);
-		} else {
+		} else if (status != 2) {
 			printf("Couldn't download file\n");
 		}
 	}

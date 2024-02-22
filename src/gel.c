@@ -158,7 +158,7 @@ file_exists(const char *const filepath)
 static int
 download_file(const char *const url, const char *const filepath)
 {
-	if (file_exists(filepath)) return 1;
+	if (file_exists(filepath)) return 2;
 
 	FILE *file = fopen(filepath, "wb");
 	if (!file) return 0;

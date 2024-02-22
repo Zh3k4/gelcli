@@ -34,7 +34,12 @@ struct GelResult {
 
 struct GelResult gel_create(const char *const key, const char *const tags);
 void gel_destroy(struct GelCtx c);
+
+/* If returns 0 - failure,
+ * If returns 1 - success,
+ * If returns 2 - file exists */
 int gel_post_download(struct GelPost p);
+
 struct GelResult gel_post_get(struct GelCtx c);
 
 #endif /* GEL_H_ */
