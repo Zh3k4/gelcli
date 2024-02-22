@@ -14,13 +14,6 @@ enum {
 	GEL_URL = 44,
 };
 
-struct GelPost {
-	const char *url;
-	int urlLen;
-	const char *filename;
-	int filenameLen;
-};
-
 static usize
 write_memory_func(void *content, usize size, usize nmemb, void *userp)
 {

@@ -15,6 +15,13 @@ struct GelCtx {
 	jsmntok_t *tokens;
 };
 
+struct GelPost {
+	const char *url;
+	int urlLen;
+	const char *filename;
+	int filenameLen;
+};
+
 struct GelResult {
 	int ok;
 	union {
