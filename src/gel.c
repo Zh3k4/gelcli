@@ -47,7 +47,7 @@ iseq_tok_cstr(const char *const json, jsmntok_t tok, const char *const s)
 	return strncmp(t, s, tlen) == 0;
 }
 
-char *
+extern char *
 unescape_str(int len, const char str[len])
 {
 	char *const new = calloc(len + 1, 1);
@@ -114,7 +114,7 @@ defer:
 	return result;
 }
 
-struct GelResult
+extern struct GelResult
 gel_post_get(struct GelCtx c)
 {
 	struct GelResult result = {0};
@@ -192,7 +192,7 @@ defer_file:
 	return status;
 }
 
-int
+extern int
 gel_post_download(struct GelPost p)
 {
 	char *const url = unescape_str(p.urlLen, p.url);
@@ -206,7 +206,7 @@ gel_post_download(struct GelPost p)
 	return status;
 }
 
-struct GelResult
+extern struct GelResult
 gel_create(const char *const key, const char *const tags)
 {
 	struct GelResult result = {0}, ret = {0};
@@ -261,7 +261,7 @@ defer:
 	return result;
 }
 
-void
+extern void
 gel_destroy(struct GelCtx c)
 {
 	if (c.json.data) free(c.json.data);
