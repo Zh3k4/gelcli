@@ -8,7 +8,6 @@
 #include <unistd.h>
 
 #include "gel.h"
-#include "jsmn.h"
 
 struct Jobs {
 	int err;
