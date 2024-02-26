@@ -71,9 +71,12 @@ run(const int nImages, char *const tags)
 
 	for (struct GelPost *p = post; p && p - post < nImages; p++) {
 		int status = gel_post_download(*p);
-		if (status == 1) {
+		switch (status) {
+		case 1:
 			printf("Downloaded file: %.*s\n", p->filenameLen, p->filename);
-		} else if (status != 2) {
+			break;
+		case 2: break;
+		default:
 			printf("Couldn't download file\n");
 		}
 	}
