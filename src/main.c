@@ -10,10 +10,21 @@
 #include "gel.h"
 #include "jsmn.h"
 
+struct Jobs {
+	int err;
+	int help;
+
+	int changeDir;
+	const char *dir;
+
+	long nImages;
+	char *tags;
+};
+
 static void
 usage(const char *const program)
 {
-	printf("Usage: %s <how many to download> <tags>\n", program);
+	printf("Usage: %s [-d <dir>] <download count> <tags>\n", program);
 }
 
 static char *
@@ -43,6 +54,58 @@ create_dir(const char *const path)
 		return 0;
 	}
 	return 1;
+}
+
+static void
+parse_args(struct Jobs *j, int argc, char **argv)
+{
+	if (argc > 0 && !strcmp(argv[0], "-h")) {
+		j->help = 1;
+		return;
+	}
+
+	if (argc < 2) {
+		j->err = 1;
+		return;
+	}
+
+	const char *arg = shift(&argc, &argv);
+
+	for (; argc > 0; arg = shift(&argc, &argv)) {
+		if (!strcmp(arg, "-d")) {
+			const char *const dir = shift(&argc, &argv);
+			if (!dir) {
+				j->err = 1;
+				return;
+			}
+			j->changeDir = 1;
+			j->dir = dir;
+		} else if (!strcmp(arg, "--")) {
+			break;
+		} else {
+			break;
+		}
+	}
+
+	/*
+	 * Positional arguments
+	 */
+
+	if (argc < 1) {
+		j->err = 1;
+		return;
+	}
+
+	char *endptr;
+	errno = 0;
+	long val = strtol(arg, &endptr, 0);
+	if (errno != 0 || arg == endptr || val < 1) {
+		j->err = 1;
+		return;
+	}
+	j->nImages = val;
+
+	j->tags = argv[0];
 }
 
 static int
@@ -94,30 +157,29 @@ defer:
 int
 main(int argc, char **argv)
 {
+	const char *dir = "gelbooru";
 	const char *const program = shift(&argc, &argv);
 
-	if (argc > 0 && strcmp(argv[0], "--help") == 0) {
+	struct Jobs jobs = {0};
+	parse_args(&jobs, argc, argv);
+
+	if (jobs.err) {
+		usage(program);
+		return EXIT_FAILURE;
+	}
+	if (jobs.help) {
 		usage(program);
 		return EXIT_SUCCESS;
 	}
-	if (argc != 2) {
-		usage(program);
-		return EXIT_FAILURE;
+	if (jobs.changeDir) {
+		dir = jobs.dir;
 	}
 
-	char *endptr, *str = argv[0];
-	errno = 0;
-	long val = strtol(str, &endptr, 0);
-	if (errno != 0 || str == endptr || val < 1) {
-		usage(program);
-		return EXIT_FAILURE;
-	}
-
-	if (!create_dir("gelbooru")) return EXIT_FAILURE;
-	if (chdir("gelbooru") == -1) {
+	if (!create_dir(dir)) return EXIT_FAILURE;
+	if (chdir(dir) == -1) {
 		perror("chdir");
 		return EXIT_FAILURE;
 	}
 
-	return run(val, argv[1]) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return run(jobs.nImages, jobs.tags) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
