@@ -51,6 +51,7 @@ run(const int nImages, char *const tags)
 	int result = 0;
 	struct GelResult ret;
 
+	struct GelCtx gel;
 	curl_global_init(CURL_GLOBAL_ALL);
 
 	for (char *c = tags; *c; c++) if (*c == ' ') *c = '+';
@@ -60,12 +61,12 @@ run(const int nImages, char *const tags)
 		fprintf(stderr, "Error: %s\n", ret.as.err);
 		goto defer;
 	}
-	struct GelCtx gel = ret.as.ctx;
+	gel = ret.as.ctx;
 
 	ret = gel_post_get(gel);
 	if (!ret.ok) {
 		fprintf(stderr, "Error: %s\n", ret.as.err);
-		goto defer_gel;
+		goto defer;
 	}
 	struct GelPost *post = ret.as.post;
 
@@ -84,9 +85,8 @@ run(const int nImages, char *const tags)
 	free(post);
 	result = 1;
 
-defer_gel:
-	gel_destroy(gel);
 defer:
+	if (gel.tokens) gel_destroy(gel);
 	curl_global_cleanup();
 	return result;
 }
