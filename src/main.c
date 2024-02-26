@@ -16,6 +16,16 @@ usage(const char *const program)
 	printf("Usage: %s <how many to download> <tags>\n", program);
 }
 
+static char *
+shift(int *argc, char ***argv)
+{
+	if (*argc < 1) return NULL;
+	char *arg = **argv;
+	*argc -= 1;
+	*argv += 1;
+	return arg;
+}
+
 static int
 create_dir(const char *const path)
 {
@@ -81,20 +91,22 @@ defer:
 int
 main(int argc, char **argv)
 {
-	if (argc > 1 && strcmp(argv[1], "--help") == 0) {
-		usage(argv[0]);
+	const char *const program = shift(&argc, &argv);
+
+	if (argc > 0 && strcmp(argv[0], "--help") == 0) {
+		usage(program);
 		return EXIT_SUCCESS;
 	}
-	if (argc != 3) {
-		usage(argv[0]);
+	if (argc != 2) {
+		usage(program);
 		return EXIT_FAILURE;
 	}
 
-	char *endptr, *str = argv[1];
+	char *endptr, *str = argv[0];
 	errno = 0;
 	long val = strtol(str, &endptr, 0);
 	if (errno != 0 || str == endptr || val < 1) {
-		usage(argv[0]);
+		usage(program);
 		return EXIT_FAILURE;
 	}
 
@@ -104,5 +116,5 @@ main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	return run(val, argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return run(val, argv[1]) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
