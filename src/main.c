@@ -24,7 +24,7 @@ struct Jobs {
 static void
 usage(const char *const program)
 {
-	printf("Usage: %s [-d <dir>] <download count> <tags>\n", program);
+		printf("Usage: %s [-d <dir>] <download count> <tags>\n", program);
 }
 
 static char *
