@@ -126,7 +126,7 @@ gel_post_get(struct GelCtx c)
 	int count = 0;
 	for (int i = GEL_FIRST_POST; i < ntok; i += GEL_POST_SIZE) count++;
 
-	struct GelPost *posts = calloc(count + 1, sizeof(struct GelPost));
+	struct GelPost *posts = calloc(count + 1, sizeof(*posts));
 	if (!posts) {
 		result.as.err = "Cannot allocate memory";
 		return result;
@@ -227,7 +227,7 @@ gel_create(const char *const key, const char *const tags)
 		goto defer_json;
 	}
 
-	jsmntok_t *tokens = calloc(ntok, sizeof(jsmntok_t));
+	jsmntok_t *tokens = calloc(ntok, sizeof(*tokens));
 	jsmn_init(&p);
 	if (!tokens) {
 		result.as.err = "Could not allocate memory";
