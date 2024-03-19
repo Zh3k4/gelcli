@@ -211,12 +211,15 @@ gel_create(const char *const key, const char *const tags)
 {
 	struct GelResult result = {0}, ret = {0};
 
+	jsmntok_t *tokens = NULL;
+	struct mem json = {0};
+
 	ret = perform_api_call(key, tags);
 	if (!ret.ok) {
 		result.as.err = ret.as.err;
-		goto defer;
+		goto errdefer;
 	}
-	struct mem json = ret.as.mem;
+	json = ret.as.mem;
 
 	jsmn_parser p;
 	jsmn_init(&p);
@@ -224,24 +227,24 @@ gel_create(const char *const key, const char *const tags)
 
 	if (ntok < 1) {
 		result.as.err = "Could not parse json";
-		goto defer_json;
+		goto errdefer;
 	}
 
-	jsmntok_t *tokens = calloc(ntok, sizeof(*tokens));
-	jsmn_init(&p);
+	tokens = calloc(ntok, sizeof(*tokens));
 	if (!tokens) {
 		result.as.err = "Could not allocate memory";
-		goto defer_json;
+		goto errdefer;
 	}
+	jsmn_init(&p);
 	ntok = jsmn_parse(&p, json.data, json.size, tokens, ntok);
 
 	if (ntok < 1 || tokens[0].type != JSMN_OBJECT) {
 		result.as.err = "Could not parse json";
-		goto defer_tokens;
+		goto errdefer;
 	}
 	if (!iseq_tok_cstr(json.data, tokens[GEL_POST], "post")) {
 		result.as.err = "Could not parse json";
-		goto defer_tokens;
+		goto errdefer;
 	}
 
 	result.ok = 1;
@@ -251,13 +254,11 @@ gel_create(const char *const key, const char *const tags)
 		.tokens = tokens,
 	};
 
-	goto defer;
+	return result;
 
-defer_tokens:
-	free(tokens);
-defer_json:
-	free(json.data);
-defer:
+errdefer:
+	if (json.data) free(json.data);
+	if (tokens) free(tokens);
 	return result;
 }
 
