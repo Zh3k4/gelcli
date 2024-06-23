@@ -132,11 +132,13 @@ run(const int nImages, char *const tags)
 	}
 	struct GelPost *post = ret.as.post;
 
+	int count = 0;
 	for (struct GelPost *p = post; p && p - post < nImages; p++) {
 		int status = gel_post_download(*p);
 		switch (status) {
 		case 1:
 			printf("Downloaded file: %.*s\n", p->filenameLen, p->filename);
+			count += 1;
 			break;
 		case 2: break;
 		default:
@@ -145,7 +147,7 @@ run(const int nImages, char *const tags)
 	}
 
 	free(post);
-	result = 1;
+	result = (count > 0);
 
 defer:
 	if (gel.tokens) gel_destroy(gel);
