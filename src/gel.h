@@ -32,7 +32,7 @@ struct GelResult {
 	} as;
 };
 
-struct GelResult gel_create(const char *const key, const char *const tags);
+struct GelResult gel_create(const char *const tags);
 void gel_destroy(struct GelCtx c);
 
 /* If returns 0 - failure,

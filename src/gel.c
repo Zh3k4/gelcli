@@ -66,7 +66,7 @@ unescape_str(int len, const char str[len])
 }
 
 static struct GelResult
-perform_api_call(const char *const key, const char *const tags)
+perform_api_call(const char *const tags)
 {
 	struct GelResult result = {0};
 
@@ -90,8 +90,8 @@ perform_api_call(const char *const key, const char *const tags)
 	}
 
 	char reqbuf[2048] = {0};
-	const char *const api = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&apikey=%s&tags=%s";
-	snprintf(reqbuf, 2048, api, key, tags);
+	const char *const api = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&api_key=anonymous&user_id=9455&tags=%s";
+	snprintf(reqbuf, 2048, api, tags);
 	curl_easy_setopt(curl, CURLOPT_URL, reqbuf);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_memory_func);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &json);
@@ -207,14 +207,14 @@ gel_post_download(struct GelPost p)
 }
 
 extern struct GelResult
-gel_create(const char *const key, const char *const tags)
+gel_create(const char *const tags)
 {
 	struct GelResult result = {0}, ret = {0};
 
 	jsmntok_t *tokens = NULL;
 	struct mem json = {0};
 
-	ret = perform_api_call(key, tags);
+	ret = perform_api_call(tags);
 	if (!ret.ok) {
 		result.as.err = ret.as.err;
 		goto errdefer;

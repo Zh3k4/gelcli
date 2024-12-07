@@ -118,7 +118,7 @@ run(const int nImages, char *const tags)
 
 	for (char *c = tags; *c; c++) if (*c == ' ') *c = '+';
 
-	ret = gel_create("", tags);
+	ret = gel_create(tags);
 	if (!ret.ok) {
 		fprintf(stderr, "Error: %s\n", ret.as.err);
 		goto defer;
