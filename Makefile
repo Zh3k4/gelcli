@@ -1,5 +1,4 @@
 .POSIX:
-.PRAGMA: target_name
 .SUFFIXES:
 
 VERSION = 0.4.0
