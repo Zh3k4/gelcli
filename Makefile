@@ -1,7 +1,7 @@
 .POSIX:
 .SUFFIXES:
 
-VERSION = 0.4.0
+VERSION = 0.5.0
 
 MAINFLAGS = --std=c99 -pedantic -DVERSION='"$(VERSION)"' -Wall -Wextra -Werror
 CFLAGS = -O1 -g
