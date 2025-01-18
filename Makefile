@@ -3,9 +3,11 @@
 
 VERSION = 0.5.0
 
-MAINFLAGS = --std=c99 -pedantic -DVERSION='"$(VERSION)"' -Wall -Wextra -Werror
-CFLAGS = -O1 -g
-LDLIBS = -lcurl
+MAINFLAGS = --std=c99 -pedantic -DVERSION='"$(VERSION)"' -Wall -Wextra -Wconversion
+CFLAGS = -O1
+#CFLAGS = -g
+LDFLAGS = -s
+LIBS = -lcurl
 
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
@@ -17,7 +19,7 @@ OBJ = \
 
 gelcli: $(OBJ)
 	@printf 'CCLD\t%s\n' '$@'
-	@$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LDLIBS)
+	@$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LIBS)
 
 .SUFFIXES: .c .o
 .c.o:
