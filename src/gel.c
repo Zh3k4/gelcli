@@ -39,8 +39,8 @@ iseq_tok_cstr(const char *const json, jsmntok_t tok, const char *const s)
 {
 	if (tok.type != JSMN_STRING) return 0;
 
-	int tlen = tok.end - tok.start;
-	int slen = strlen(s);
+	size_t tlen = (size_t)(tok.end - tok.start);
+	size_t slen = strlen(s);
 	if (tlen != slen) return 0;
 
 	const char *const t = &json[tok.start];
@@ -48,7 +48,7 @@ iseq_tok_cstr(const char *const json, jsmntok_t tok, const char *const s)
 }
 
 extern char *
-unescape_str(int len, const char str[len])
+unescape_str(size_t len, const char str[len])
 {
 	char *const new = calloc(len + 1, 1);
 	if (!new) return NULL;
@@ -57,7 +57,7 @@ unescape_str(int len, const char str[len])
 	const char *ss = s;
 	char *n = new;
 
-	while (s - ss < len) {
+	while ((size_t)(s - ss) < len) {
 		if (*s == '\\') s++;
 		*n++ = *s++;
 	}
@@ -123,8 +123,9 @@ gel_post_get(struct GelCtx c)
 	int ntok = c.ntok;
 	jsmntok_t *tokens = c.tokens;
 
-	int count = 0;
-	for (int i = GEL_FIRST_POST; i < ntok; i += GEL_POST_SIZE) count++;
+	size_t count = 0;
+	for (int i = GEL_FIRST_POST; i < ntok; i += GEL_POST_SIZE)
+		count++;
 
 	struct GelPost *posts = calloc(count + 1, sizeof(*posts));
 	if (!posts) {
@@ -138,9 +139,9 @@ gel_post_get(struct GelCtx c)
 		jsmntok_t url = tokens[i + GEL_URL];
 
 		p->url = &json[url.start];
-		p->urlLen = url.end - url.start;
+		p->urlLen = (size_t)(url.end - url.start);
 		p->filename = &json[fn.start];
-		p->filenameLen = fn.end - fn.start;
+		p->filenameLen = (size_t)(fn.end - fn.start);
 	}
 
 	result.ok = 1;
@@ -230,13 +231,13 @@ gel_create(const char *const tags)
 		goto errdefer;
 	}
 
-	tokens = calloc(ntok, sizeof(*tokens));
+	tokens = calloc((unsigned)ntok, sizeof(*tokens));
 	if (!tokens) {
 		result.as.err = "Could not allocate memory";
 		goto errdefer;
 	}
 	jsmn_init(&p);
-	ntok = jsmn_parse(&p, json.data, json.size, tokens, ntok);
+	ntok = jsmn_parse(&p, json.data, json.size, tokens, (unsigned)ntok);
 
 	if (ntok < 1 || tokens[0].type != JSMN_OBJECT) {
 		result.as.err = "Could not parse json";

@@ -17,9 +17,9 @@ struct GelCtx {
 
 struct GelPost {
 	const char *url;
-	int urlLen;
+	size_t urlLen;
 	const char *filename;
-	int filenameLen;
+	size_t filenameLen;
 };
 
 struct GelResult {

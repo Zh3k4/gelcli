@@ -137,7 +137,7 @@ run(const int nImages, char *const tags)
 		int status = gel_post_download(*p);
 		switch (status) {
 		case 1:
-			printf("Downloaded file: %.*s\n", p->filenameLen, p->filename);
+			printf("Downloaded file: %.*s\n", (int)p->filenameLen, p->filename);
 			count += 1;
 			break;
 		case 2: break;
@@ -182,5 +182,5 @@ main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	return run(jobs.nImages, jobs.tags) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return run((int)jobs.nImages, jobs.tags) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
