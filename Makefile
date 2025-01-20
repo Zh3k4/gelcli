@@ -13,8 +13,8 @@ LIBS = -lcurl
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 
-gelcli: $(shell find src/ -name '*.c')
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
+gelcli: $(shell find src/ -name '*.[ch]')
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ src/main.c $(LIBS)
 
 install: gelcli
 	install -Dm755 gelcli $(DESTDIR)$(BINDIR)/gelcli

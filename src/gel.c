@@ -1,10 +1,31 @@
-#include <curl/curl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
 
-#include "gel.h"
+struct mem {
+	size_t size;
+	char *data;
+};
+
+struct GelCtx {
+	int ntok;
+	struct mem json;
+	jsmntok_t *tokens;
+};
+
+struct GelPost {
+	const char *url;
+	size_t urlLen;
+	const char *filename;
+	size_t filenameLen;
+};
+
+struct GelResult {
+	int ok;
+	union {
+		const char *err;
+		struct GelCtx ctx;
+		struct GelPost *post;
+		struct mem mem;
+	} as;
+};
 
 enum {
 	GEL_POST = 9,
@@ -14,8 +35,8 @@ enum {
 	GEL_URL = 44,
 };
 
-static usize
-write_memory_func(void *content, usize size, usize nmemb, void *userp)
+static size_t
+write_memory_func(void *content, size_t size, size_t nmemb, void *userp)
 {
 	size *= nmemb;
 	struct mem *m = (struct mem *)userp;
@@ -114,7 +135,7 @@ defer:
 	return result;
 }
 
-extern struct GelResult
+static struct GelResult
 gel_post_get(struct GelCtx c)
 {
 	struct GelResult result = {0};
@@ -193,7 +214,7 @@ defer_file:
 	return status;
 }
 
-extern int
+static int
 gel_post_download(struct GelPost p)
 {
 	char *const url = unescape_str(p.urlLen, p.url);
@@ -207,7 +228,7 @@ gel_post_download(struct GelPost p)
 	return status;
 }
 
-extern struct GelResult
+static struct GelResult
 gel_create(const char *const tags)
 {
 	struct GelResult result = {0}, ret = {0};
@@ -263,7 +284,7 @@ errdefer:
 	return result;
 }
 
-extern void
+static void
 gel_destroy(struct GelCtx c)
 {
 	if (c.json.data) free(c.json.data);

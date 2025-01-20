@@ -7,7 +7,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "gel.h"
+#define JSMN_STATIC
+#define JSMN_IMPL
+#include "jsmn.h"
+#include "gel.c"
 
 struct Jobs {
 	int err;
