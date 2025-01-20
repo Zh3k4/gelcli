@@ -1,30 +1,17 @@
-.POSIX:
-.SUFFIXES:
-
 VERSION = 0.5.0
 
-MAINFLAGS = --std=c99 -pedantic -DVERSION='"$(VERSION)"' -Wall -Wextra -Wconversion
-CFLAGS = -O1
-#CFLAGS = -g
+CFLAGS = --std=c99 -pedantic \
+	-Wall -Wextra -Wconversion \
+	-O1 \
+	-DVERSION='"$(VERSION)"'
 LDFLAGS = -s
 LIBS = -lcurl
 
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 
-OBJ = \
-	src/gel.o \
-	src/jsmn.o \
-	src/main.o
-
-gelcli: $(OBJ)
-	@printf 'CCLD\t%s\n' '$@'
-	@$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LIBS)
-
-.SUFFIXES: .c .o
-.c.o:
-	@printf 'CC\t%s\n' '$@'
-	@$(CC) -c -o $@ $(CFLAGS) $(MAINFLAGS) $(INCLUDE) $<
+gelcli: $(shell find src/ -name '*.c')
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 install: gelcli
 	install -Dm755 gelcli $(DESTDIR)$(BINDIR)/gelcli
