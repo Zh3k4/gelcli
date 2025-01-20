@@ -1,7 +1,10 @@
 VERSION = 0.5.0
 
 CFLAGS = --std=c99 -pedantic \
-	-Wall -Wextra -Wconversion \
+	-Wall -Wextra -Wbad-function-cast -Wcast-align -Wcast-qual \
+	-Wconversion -Wmissing-declarations -Wmissing-prototypes \
+	-Wmissing-variable-declarations -Wpointer-arith -Wshadow \
+	-Wstrict-prototypes -Wswitch -Wundef -Wwrite-strings \
 	-O1 \
 	-DVERSION='"$(VERSION)"'
 LDFLAGS = -s
