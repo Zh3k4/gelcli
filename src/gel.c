@@ -47,7 +47,7 @@ iseq_tok_cstr(const char *const json, jsmntok_t tok, const char *const s)
 	return strncmp(t, s, tlen) == 0;
 }
 
-extern char *
+static char *
 unescape_str(size_t len, const char str[len])
 {
 	char *const new = calloc(len + 1, 1);
