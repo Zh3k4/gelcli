@@ -116,7 +116,7 @@ run(const int nImages, char *const tags)
 	int result = 0;
 	struct GelResult ret;
 
-	struct GelCtx gel;
+	struct GelCtx gel = {0};
 	curl_global_init(CURL_GLOBAL_ALL);
 
 	for (char *c = tags; *c; c++) if (*c == ' ') *c = '+';
