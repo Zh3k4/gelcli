@@ -112,7 +112,7 @@ perform_api_call(const char *const tags)
 
 	char reqbuf[2048] = {0};
 	const char *const api = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&api_key=anonymous&user_id=9455&tags=%s";
-	snprintf(reqbuf, 2048, api, tags);
+	snprintf(reqbuf, sizeof(reqbuf), api, tags);
 	curl_easy_setopt(curl, CURLOPT_URL, reqbuf);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_memory_func);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &json);
